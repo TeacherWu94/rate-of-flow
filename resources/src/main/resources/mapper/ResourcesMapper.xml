@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.whzm.mapper.ResourcesMapper">
+    <resultMap id="baseResultMap" type="com.whzm.pojo.vo.ResourcesListVo">
+        <id column="id" property="id"/>
+        <result column="type" property="type"/>
+        <result column="name" property="name"/>
+        <result column="user_id" property="userId"/>
+        <result column="company" property="company"/>
+        <result column="create_time" property="createTime"/>
+        <collection property="implementations" javaType="java.util.List" ofType="com.whzm.pojo.Implementation">
+            <id column="implementation_id" property="implementationId"/>
+            <result column="implementation_name" property="implementationName"/>
+        </collection>
+
+        <collection property="areas" javaType="java.util.List" ofType="com.whzm.pojo.Area">
+            <id column="area_id" property="areaId"/>
+            <result column="address_detail" property="addressDetail"/>
+        </collection>
+        <collection property="cooperations" javaType="java.util.List" ofType="com.whzm.pojo.Cooperation">
+            <id column="cooperation_id" property="cooperationId"/>
+            <result column="cooperation_name" property="cooperationName"/>
+        </collection>
+    </resultMap>
+
+    <select id="queryAll" resultMap="baseResultMap">
+        select
+        resources.id id,
+        resources.name name,
+        resources.type type,
+        resources.user_id userId,
+        resources.company company,
+        resources.create_time create_time,
+        flow_implementation.implementation_id implementation_id,
+        flow_implementation.implementation_name implementation_name,
+        cooperation_type.cooperation_id cooperation_id,
+        cooperation_type.cooperation_name cooperation_name,
+        flow_area.area_id area_id,
+        flow_area.address_detail address_detail
+        from
+        resources,flow_implementation,resources_implementation,
+        cooperation_type,resources_cooperation,
+        flow_area,resources_area
+        <where>
+            resources.is_deleted = '0'
+            and
+            resources.id = resources_implementation.resources_id and
+            resources_implementation.implementation_id = flow_implementation.implementation_id
+            and
+            resources.id = resources_cooperation.resources_id and
+            resources_cooperation.cooperation_id=cooperation_type.cooperation_id
+            and
+            resources.id = resources_area.resources_id and resources_area.area_id = flow_area.area_id
+            <if test="type != null and type != 0">
+                and resources.type = #{type}
+            </if>
+        </where>
+    </select>
+
+    <resultMap id="baseResultMap1" type="com.whzm.pojo.vo.ResourceDetailVo">
+        <id column="id" property="resourceId"/>
+        <result column="name" property="name"/>
+        <result column="user_id" property="userId"/>
+        <result column="company" property="company"/>
+        <result column="number" property="number"/>
+        <result column="detail" property="detail"/>
+        <result column="username" property="userName"/>
+        <result column="phone" property="phone"/>
+        <result column="wechat" property="wechat"/>
+        <collection property="implementations" javaType="java.util.List" ofType="com.whzm.pojo.Implementation">
+            <id column="implementation_id" property="implementationId"/>
+            <result column="implementation_name" property="implementationName"/>
+        </collection>
+        <collection property="cooperations" javaType="java.util.List" ofType="com.whzm.pojo.Cooperation">
+            <id column="cooperation_id" property="cooperationId"/>
+            <result column="cooperation_name" property="cooperationName"/>
+        </collection>
+    </resultMap>
+
+    <select id="getById" resultMap="baseResultMap1">
+        select
+        resources.id id,
+        resources.name name,
+        resources.user_id user_id,
+        resources.company company,
+        resources.number number,
+        resources.detail detail,
+        flow_user.username username,
+        flow_user.phone phone,
+        flow_user.wechat wechat,
+        flow_implementation.implementation_id implementation_id,
+        flow_implementation.implementation_name implementation_name,
+        cooperation_type.cooperation_id cooperation_id,
+        cooperation_type.cooperation_name cooperation_name
+        from
+        resources,flow_implementation,resources_implementation,
+        cooperation_type,resources_cooperation,
+        flow_user
+        <where>
+            resources.is_deleted = '0' and resources.user_id = flow_user.id
+            and
+            resources.id = #{id}
+            and
+            resources.id = resources_implementation.resources_id and
+            resources_implementation.implementation_id = flow_implementation.implementation_id
+            and
+            resources.id = resources_cooperation.resources_id and
+            resources_cooperation.cooperation_id=cooperation_type.cooperation_id
+        </where>
+    </select>
+
+
+    <insert id="addResource">
+        insert into resources
+        (id,type,name,user_id,number,company,detail)
+        values (#{id},#{type},#{name},#{userId},#{number},#{company},#{detail})
+
+    </insert>
+</mapper>
